@@ -24,8 +24,8 @@ class ControllerNode(Node):
         self.odom_subscriber = self.create_subscription(Odometry, 'odom', self.odom_callback, 10)
 
         self.proximity_center_subscriber = self.create_subscription(Range, 'proximity/center', self.proximity_callback, 10)
-        self.proximity_center_left_subscriber = self.create_subscription(Range, 'proximity/center_left', self.proximity_callback_left, 10)
-        self.proximity_center_right_subscriber = self.create_subscription(Range, 'proximity/center_right', self.proximity_callback_right, 10)
+        # self.proximity_center_left_subscriber = self.create_subscription(Range, 'proximity/center_left', self.proximity_callback_left, 10)
+        # self.proximity_center_right_subscriber = self.create_subscription(Range, 'proximity/center_right', self.proximity_callback_right, 10)
         self.proximity_left_subscriber = self.create_subscription(Range, 'proximity/left', self.proximity_callback_left, 10)
         self.proximity_right_subscriber = self.create_subscription(Range, 'proximity/right', self.proximity_callback_right, 10)
 
@@ -50,21 +50,21 @@ class ControllerNode(Node):
 
     def proximity_callback(self, message):
         distance  = message.range
-        if distance >= 0 and distance < 0.05:
+        if distance >= 0 and distance < 0.2:
             self.info_stop = distance
         else:
             self.info_stop = -1.0
 
     def proximity_callback_left(self, message):
         distance  = message.range
-        if distance >= 0 and distance < 0.05:
+        if distance >= 0 and distance < 0.2:
             self.info_stop_left = distance
         else:
             self.info_stop_left = -1.0
 
     def proximity_callback_right(self, message):
         distance  = message.range
-        if distance >= 0 and distance < 0.05:
+        if distance >= 0 and distance < 0.2:
             self.info_stop_right = distance
         else:
             self.info_stop_right = -1.0
@@ -125,7 +125,7 @@ class ControllerNode(Node):
                 cmd_vel.angular.z = 0.0
         # Non ho un muro a destra neanche al fronte
         elif self.info_stop_right < 0 and self.info_stop < 0:
-            cmd_vel.linear.x = 0.0
+            cmd_vel.linear.x = 0.1
             cmd_vel.angular.z = 0.3
         # Ho un muro a destra e ho un muro al fronte
         elif self.info_stop_right > 0 and self.info_stop > 0:
