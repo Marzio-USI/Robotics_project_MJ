@@ -116,10 +116,10 @@ class ControllerNode(Node):
         small_left_angle = -math.pi/12
         # robot has no right wall and no front wall
         if self.info_stop_right < 0 and (self.info_stop < 0):
-            cmd_vel.linear.x = 0.1
+            cmd_vel.linear.x = 0.3
             cmd_vel.angular.z = right_angle
         elif self.info_stop_right > 0 and (self.info_stop < 0):
-            cmd_vel.linear.x = 0.1
+            cmd_vel.linear.x = 0.3
             # check for collision on the right 
             if self.info_stop_right < 0.1:
                 cmd_vel.angular.z = small_left_angle
@@ -129,8 +129,8 @@ class ControllerNode(Node):
                 cmd_vel.angular.z = 0.0
         elif self.info_stop_right > 0 and (self.info_stop > 0):
             # rotate to the left
-            cmd_vel.linear.x = 0.1
-            cmd_vel.angular.z = left_angle
+            cmd_vel.linear.x = 0.3
+            cmd_vel.angular.z = -left_angle
         self.vel_publisher.publish(cmd_vel)
 
 
