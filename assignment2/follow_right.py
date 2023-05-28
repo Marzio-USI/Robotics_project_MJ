@@ -134,6 +134,9 @@ class ControllerNode(Node):
         elif self.info_stop > 0 and self.info_stop_right <0:
             cmd_vel.linear.x = 0.0
             cmd_vel.angular.z = -0.3
+        elif self.info_stop_left > 0 and self.info_stop < 0:
+            cmd_vel.linear.x = 0.0
+            cmd_vel.angular.z = 0.3
         
         
       
