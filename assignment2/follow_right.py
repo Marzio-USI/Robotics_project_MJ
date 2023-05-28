@@ -189,7 +189,7 @@ class ControllerNode(Node):
             cmd_vel.angular.z = - math.pi / 6
         elif self.info_stop_right > 0 and self.info_stop_left > 0 and self.info_stop < 0:  # Right wall present, and also left wall and no front wall
             # Continue straight
-            cmd_vel.linear.x = 0.
+            cmd_vel.linear.x = 0.5
             cmd_vel.angular.z = 0.0
         else:
             # Situation not recognized, stop
