@@ -111,58 +111,47 @@ class ControllerNode(Node):
     def update_callback(self):
         
         cmd_vel = Twist() 
-        # move the robot randomly and check for obstacles
         
-        if self.no_wall_encountered():
-            self.full_rotating = False
-            if self.turning and (time.time() - self.start_time) < self.time_to_turn:
-                cmd_vel.linear.x = 0.0
-                cmd_vel.angular.z = self.angle_turn
-            elif np.random.random() >= self.move_thr:
-                self.angle_turn = np.random.uniform(-math.pi/4, math.pi/4)
-                cmd_vel.linear.x = 0.0
-                cmd_vel.angular.z = self.angle_turn
-                self.time_to_turn = np.random.randint(1, 4)
-                self.start_time = time.time()
-                self.turning = True
+        # Ho un muro a destra e non ho un muro al fronte
+        if self.info_stop_right > 0 and self.info_stop < 0:
+            if self.info_stop_right < 0.1:
+                cmd_vel.linear.x = 0.3
+                cmd_vel.angular.z = -math.pi/12
+            elif self.info_stop_right > 0.15: # Check iff better same number TODO
+                cmd_vel.linear.x = 0.3
+                cmd_vel.angular.z = math.pi/12
             else:
-                self.turning = False
                 cmd_vel.linear.x = 0.3
                 cmd_vel.angular.z = 0.0
-        else:
-            self.turning = False
-            angle = self.move_away_from_wall()
+        # Non ho un muro a destra neanche al fronte
+        elif self.info_stop_right < 0 and self.info_stop < 0:
             cmd_vel.linear.x = 0.0
-            cmd_vel.angular.z = angle
-        # Publish the command
+            cmd_vel.angular.z = 0.3
+        # Ho un muro a destra e ho un muro al fronte
+        elif self.info_stop_right > 0 and self.info_stop > 0:
+            cmd_vel.linear.x = 0.0
+            cmd_vel.angular.z = -0.3
+        
+        
+      
         self.vel_publisher.publish(cmd_vel)
     
+    def wall_on_the_right(self):
+        return self.info_stop_right > 0
 
     def move_away_from_wall(self):
-        if self.full_rotating:
-            return math.pi /2
-        
-        if (self.info_stop_right < 0) and (self.info_stop_left < 0):
-            self.full_rotating = True
-            return 0.0
-        rotating_angle = 0.0
-        if (self.info_stop_right > 0) and (self.info_stop_left > 0):
-            if abs(self.info_stop_left - self.info_stop_right) < 0.009:
-                self.full_rotating = True
-            elif self.info_stop_right < self.info_stop_left:
-                # rotate left
-                rotating_angle = math.pi/6.0
-            else:
-                # rotate right
-                rotating_angle = - math.pi/6.0
-        elif self.info_stop_right < 0:
-            # rotate right
-            rotating_angle = - math.pi/6.0
+        # move away such that it detects only the right wall
+        rotating_angle_right = math.pi/2
+        if self.info_stop_left > 0:
+            return math.pi/2
+        elif self.info_stop > 0:
+            return math.pi/2
         else:
-            # rotate left
-            rotating_angle = math.pi/6.0
-        return rotating_angle
-        
+            # check only if it too close to the wall
+            if self.info_stop_right < 0.05:
+                return math.pi/2     
+        return 0.0
+    
 
     def no_wall_encountered(self):
         return  (self.info_stop < 0) and (self.info_stop_left < 0) and (self.info_stop_right < 0)
