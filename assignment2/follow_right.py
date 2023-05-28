@@ -194,11 +194,11 @@ class ControllerNode(Node):
         else:
             # Situation not recognized, stop
             cmd_vel.linear.x = 0.0
-            cmd_vel.angular.z = 0.0
+            cmd_vel.angular.z = 0.9
         
         
       
-    #     self.vel_publisher.publish(cmd_vel)
+        self.vel_publisher.publish(cmd_vel)
     
     def wall_on_the_right(self):
         return self.info_stop_right > 0
