@@ -110,10 +110,10 @@ class ControllerNode(Node):
     
     def update_callback(self):
         cmd_vel = Twist() 
-        right_angle = math.pi/6
-        left_angle = -math.pi/6
-        small_right_angle = math.pi/12
-        small_left_angle = -math.pi/12
+        right_angle = -math.pi/6
+        left_angle = math.pi/6
+        small_right_angle = -math.pi/12
+        small_left_angle = math.pi/12
         # robot has no right wall and no front wall
         if self.info_stop_right < 0 and (self.info_stop < 0):
             cmd_vel.linear.x = 0.3
@@ -130,7 +130,7 @@ class ControllerNode(Node):
         elif self.info_stop_right > 0 and (self.info_stop > 0):
             # rotate to the left
             cmd_vel.linear.x = 0.0
-            cmd_vel.angular.z = -left_angle
+            cmd_vel.angular.z = left_angle
         self.vel_publisher.publish(cmd_vel)
 
 
