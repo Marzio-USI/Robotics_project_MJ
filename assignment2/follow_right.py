@@ -166,6 +166,8 @@ class ControllerNode(Node):
             cmd_vel.angular.z = 0.6
         
         self.vel_publisher.publish(cmd_vel)
+
+ 
     
     def wall_on_the_right(self):
         return self.info_stop_right > 0
