@@ -129,7 +129,7 @@ class ControllerNode(Node):
                 cmd_vel.angular.z = 0.0
         elif self.info_stop_right > 0 and (self.info_stop > 0):
             # rotate to the left
-            cmd_vel.linear.x = 0.3
+            cmd_vel.linear.x = 0.0
             cmd_vel.angular.z = -left_angle
         self.vel_publisher.publish(cmd_vel)
 
