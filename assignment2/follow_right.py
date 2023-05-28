@@ -108,38 +108,7 @@ class ControllerNode(Node):
         
         return pose2
     
-    # def update_callback(self):
-    #     cmd_vel = Twist() 
-    #     right_angle = -math.pi/6
-    #     left_angle = math.pi/6
-    #     small_right_angle = -math.pi/12
-    #     small_left_angle = math.pi/12
-    #     # robot has no right wall and no front wall
-    #     if self.info_stop_right < 0 and (self.info_stop < 0):
-    #         cmd_vel.linear.x = 0.3
-    #         cmd_vel.angular.z = right_angle
-    #     elif self.info_stop_right > 0 and (self.info_stop < 0):
-    #         cmd_vel.linear.x = 0.3
-    #         # check for collision on the right 
-    #         if self.info_stop_right < 0.1:
-    #             cmd_vel.angular.z = small_left_angle
-    #         elif self.info_stop_right > 0.15:
-    #             cmd_vel.angular.z = small_right_angle
-    #         else:
-    #             cmd_vel.angular.z = 0.0
-    #     elif self.info_stop_right > 0 and (self.info_stop > 0):
-    #         # rotate to the left
-    #         cmd_vel.linear.x = 0.0
-    #         cmd_vel.angular.z = left_angle
-    #     else:
-    #         cmd_vel.linear.x = 0.3
-    #         cmd_vel.angular.z = 0.0
-    #     self.vel_publisher.publish(cmd_vel)
-
-
-        
     def update_callback(self):
-        
         cmd_vel = Twist() 
         right_angle = -math.pi/6
         left_angle = math.pi/6
@@ -151,20 +120,20 @@ class ControllerNode(Node):
             cmd_vel.angular.z = right_angle * 6
         elif self.info_stop_right > 0 and (self.info_stop < 0):
             cmd_vel.linear.x = 0.3
-            cmd_vel.angular.z = 0.0
-        elif self.info_stop_right > 0 and self.info_stop > 0:  # Right wall present, front blocked
-            # Turn Left
+            # check for collision on the right 
+            if self.info_stop_right < 0.1:
+                cmd_vel.angular.z = small_left_angle
+            elif self.info_stop_right > 0.15:
+                cmd_vel.angular.z = small_right_angle
+            else:
+                cmd_vel.angular.z = 0.0
+        elif self.info_stop_right > 0 and (self.info_stop > 0):
+            # rotate to the left
             cmd_vel.linear.x = 0.0
-            cmd_vel.angular.z = math.pi / 6
-        elif self.info_stop_right < 0:  # No wall on right
-            # Turn Right
-            cmd_vel.linear.x = 0.0
-            cmd_vel.angular.z = - math.pi / 6
+            cmd_vel.angular.z = left_angle
         else:
-            # Situation not recognized, stop
-            cmd_vel.linear.x = 0.0
-            cmd_vel.angular.z = 0.6
-        
+            cmd_vel.linear.x = 0.3
+            cmd_vel.angular.z = 0.0
         self.vel_publisher.publish(cmd_vel)
 
  
