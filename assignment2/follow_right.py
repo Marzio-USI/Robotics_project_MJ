@@ -117,7 +117,7 @@ class ControllerNode(Node):
         # robot has no right wall and no front wall
         if self.info_stop_right < 0 and (self.info_stop < 0):
             cmd_vel.linear.x = 0.3
-            cmd_vel.angular.z = right_angle
+            cmd_vel.angular.z = right_angle * 6
         elif self.info_stop_right > 0 and (self.info_stop < 0):
             cmd_vel.linear.x = 0.3
             # check for collision on the right 
