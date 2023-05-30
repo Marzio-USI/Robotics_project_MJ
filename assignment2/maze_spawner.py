@@ -28,8 +28,18 @@ sys.path.append(dir_path5)
 from zmqRemoteApi import RemoteAPIClient
 import time
 
+sim_objectspecialproperty_collidable   =0x000001
+sim_objectspecialproperty_measurable  =0x000002
+sim_objectspecialproperty_detectable_ultrasonic =0x000004
+sim_objectspecialproperty_detectable_infrared =0x000008
+sim_objectspecialproperty_detectable_laser =0x000010
+sim_objectspecialproperty_detectable_inductive =0x000020
+sim_objectspecialproperty_detectable_capacitive =0x000040
+sim_objectspecialproperty_renderable =0x000080
+
 def spawn_maze(size=40):
-        
+    
+
     print('start')
     client = RemoteAPIClient()
     print('connected')
@@ -46,14 +56,18 @@ def spawn_maze(size=40):
 
     wall_size_x = [0.6, 0.1, 1.0] 
     wall_size_y = [0.1, 0.6, 1.0]
+    properties_objects = sim_objectspecialproperty_collidable | sim_objectspecialproperty_measurable | sim_objectspecialproperty_detectable_ultrasonic | sim_objectspecialproperty_detectable_infrared | sim_objectspecialproperty_detectable_laser | sim_objectspecialproperty_detectable_inductive | sim_objectspecialproperty_detectable_capacitive | sim_objectspecialproperty_renderable
 
     for (v_x, v_y) in cood_vert:
         wall_handle = sim.createPrimitiveShape(cuboid_type, wall_size_x)
         sim.setObjectPosition(wall_handle, -1, [v_x, v_y, 0.5])
+        sim.setObjectSpecialProperty(wall_handle, properties_objects)
 
     for (h_x, h_y) in cood_horz:
         wall_handle = sim.createPrimitiveShape(cuboid_type, wall_size_y)
         sim.setObjectPosition(wall_handle, -1, [h_x, h_y, 0.5])
+        sim.setObjectSpecialProperty(wall_handle, properties_objects)
+        
 
     # for (n_x, n_y) in node_cord:
     #     wall_handle = sim.createPrimitiveShape(cuboid_type, [0.0, 0.0, 0.5])
