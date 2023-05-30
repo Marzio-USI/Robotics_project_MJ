@@ -9,8 +9,6 @@ import sys
 from sensor_msgs.msg import Range
 import math
 import os
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(parent_dir)
 import sim
 class MazeSpawner(Node):
     def __init__(self):
