@@ -1,31 +1,6 @@
-Authors: Jorge Espinar, Marzio Lunghi
+Make sure you have following files in your directory, in order to run the various examples:
 
-Most advanced task is: Task 3 
-To run task 3 do:
-
-1. Build the project using:
-colcon build --packages-select assignment2
-
-2. In a new terminal start the bridge:
-ros2 launch thymioid main.launch device:="tcp:host=localhost;port=33333" simulation:=True name:=thymio0
-
-3. In a new terminal (after source ~/dev_ws/install/setup.bash), run:
-ros2 launch assignment2 controller.launch.xml thymio_name:=thymio0
-
-Note: you have to load the wall scene in Coppelia
-
-For the bonus
-Repeat setp 1. and 2. above and then in a new terminal (after source ~/dev_ws/install/setup.bash) run:
-ros2 launch assignment2 controller.launch.xml thymio_name:=thymio0 exec_name:=bonus
-
-By default 'exec_name' has value 'task3'
-
-Note: you have to open the 'HW2 scene' scene in Coppelia 
-
-Note:
-All the tasks have been implemented on top of thymio_example [https://github.com/EliaCereda/thymio_example], more precisely the controller class in controller_node.py was used.
-Plus, the euclidian distance function was copied from previous assginment.
-
-Videos link = https://drive.google.com/drive/folders/1yhBbJaZBoDgfpzq34z8Ti6R3rhIFkN65?usp=sharing
-
-The shared folder includes both video for task 3 and bonus
+1. sim.py
+2. simConst.py
+3. the appropriate remote API library: "remoteApi.dll" (Windows), "remoteApi.dylib" (Mac) or "remoteApi.so" (Linux)
+4. simpleTest.py (or any other example file)
