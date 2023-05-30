@@ -28,7 +28,7 @@ sys.path.append(dir_path5)
 from zmqRemoteApi import RemoteAPIClient
 import time
 
-def spawn_maze():
+def spawn_maze(size=40):
         
     print('start')
     client = RemoteAPIClient()
@@ -39,7 +39,7 @@ def spawn_maze():
     cuboid_type = sim.primitiveshape_cuboid
 
     maze = GraphMaze()
-    nodes, verticals, horizontals, edges, cood_vert, cood_horz =  maze.generate_maze(size=40)
+    nodes, verticals, horizontals, edges, cood_vert, cood_horz =  maze.generate_maze(size=size)
     node_cord = maze.node_coordinates
 
     # maze.draw_maze()
