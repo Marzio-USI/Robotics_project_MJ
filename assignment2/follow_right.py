@@ -119,13 +119,14 @@ class ControllerNode(Node):
             cmd_vel.linear.x = 0.3
             cmd_vel.angular.z = right_angle * 6
         elif self.info_stop_right > 0 and (self.info_stop < 0):
-            cmd_vel.linear.x = 0.3
+            cmd_vel.linear.x = 0.8
             # check for collision on the right 
             if self.info_stop_right < 0.1:
                 cmd_vel.angular.z = small_left_angle
             elif self.info_stop_right > 0.15:
                 cmd_vel.angular.z = small_right_angle
             else:
+                cmd_vel.linear.x = 1.5
                 cmd_vel.angular.z = 0.0
         elif self.info_stop_right > 0 and (self.info_stop > 0):
             # rotate to the left
