@@ -9,7 +9,12 @@ import sys
 from sensor_msgs.msg import Range
 import math
 import os
+dir_path = os.path.dirname(os.path.abspath(__file__))
+
+# Add the directory to sys.path
+sys.path.append(dir_path)
 import sim
+ 
 class MazeSpawner(Node):
     def __init__(self):
         super().__init__('maze_spawner')
@@ -27,10 +32,11 @@ class MazeSpawner(Node):
 
         
       
-
+import os
 
 def main():
     # Initialize the ROS client library
+
     rclpy.init(args=sys.argv)
     
     # Create an instance of your node class
