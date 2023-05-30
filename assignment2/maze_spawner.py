@@ -18,16 +18,16 @@ import sim
 class MazeSpawner(Node):
     def __init__(self):
         super().__init__('maze_spawner')
-        wall_size = [1.0, 1.0, 0.1] 
+        sim.simxFinish(-1)
 
-        wall_handle = sim.simCreatePureShape(0,  # Param 1 indicates the shape type: 0 = cuboid
-                                            8,  # Param 2 is a combination of bit-coded settings: 8 = respondable
-                                            wall_size,  # Param 3 is the size of the shape
-                                            0,  # Param 4 is the mass of the shape
-                                            None)  # Param 5 can be used to specify additional options
+    clientID = sim.simxStart('172.16.165.129',33333,True,True,5000,5)
 
-        # Move the wall to a specific location
-        sim.simSetObjectPosition(wall_handle, -1, [0.0, 0.0, 0.5])
+    if clientID!= -1:
+        print("Connected to Remote API Server")
+    else:
+        print("Connection failed")
+        sys.exit('Could not reconnect')
+    sim.simxFinish(clientID)
 
 
         
