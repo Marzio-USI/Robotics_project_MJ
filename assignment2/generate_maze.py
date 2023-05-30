@@ -23,6 +23,33 @@ class GraphMaze:
             x = middle_point[0] + (i % 10) * 0.5
             y = middle_point[1] + (i // 10) * 0.5
             self.node_coordinates[i] = [x, y]
+
+        for i in range(n_nodes):
+            x = self.node_coordinates[i][0]
+            y = self.node_coordinates[i][1]
+            if x <= 2.5:
+                self.node_coordinates[i][0] = -2.5 + self.node_coordinates[i][0]
+            elif x > 2.5:
+                self.node_coordinates[i][0] -= 2.5
+            
+            if y <=2.5:
+                self.node_coordinates[i][1] = -2.5 + self.node_coordinates[i][1]
+            elif y > 2.5:
+                self.node_coordinates[i][1] -= 2.5 
+
+
+    def generate_edge_coordinates(self, edges):
+        tmp = []
+        for in_nodes, out_nodes in edges:
+            in_x, in_y = self.node_coordinates[in_nodes]
+            out_x, out_y = self.node_coordinates[out_nodes]
+            X = (in_x + out_x)/2
+            Y = (in_y + out_y)/2 
+            tmp.append((X, Y))
+
+        return tmp
+
+
         
 
     def print_coordinates(self):
@@ -66,8 +93,11 @@ class GraphMaze:
         verticals = []
         horizontals = []
 
+        max_edges = np.sum(self.edges)//2 - (len(self.nodes) - 1)
+        if size >=  max_edges/2:
+            size = max_edges
+
         do_not_pick = []
-        
         i = 0
         while i < size:
 
@@ -90,11 +120,12 @@ class GraphMaze:
                 self.edges[out_nodes, in_nodes] = 1
                 do_not_pick.append((in_nodes, out_nodes))
 
-        
+        cood_vert = self.generate_edge_coordinates(verticals)
+        cood_horz = self.generate_edge_coordinates(horizontals)
 
         
 
-        return self.nodes, verticals, horizontals, self.edges
+        return self.nodes, verticals, horizontals, self.edges, cood_vert, cood_horz
     
     def dfs(self, in_nodes, out_nodes):
         start_node = 0
@@ -104,19 +135,18 @@ class GraphMaze:
             node = stack.pop()
             if visited[node] == 0:
                 visited[node] = 1
-                print(node)
+                # print(node)
                 
                 for neighbour in self.get_neighbours(node):
                     stack.append(neighbour)
         if np.sum(visited) == n_nodes:
-            print("DFS: Maze is connected")
+            # print("DFS: Maze is connected")
             return True
         else:
             return False
     
 
-    def draw_maze(self, size=30):
-        _, verticals, horizontals, _ = self.generate_maze(size=size)
+    def draw_maze(self, verticals=None, horizontals=None, size=30):
         G = nx.Graph()
     
         # Add nodes to the graph
@@ -143,10 +173,12 @@ class GraphMaze:
         plt.show()
 
 
-if __name__ == '__main__':
-    maze = GraphMaze()
-    maze.draw_maze(size=80)
-    maze.print_coordinates()
+# if __name__ == '__main__':
+#     maze = GraphMaze()
+#     *_, a, b = maze.generate_maze(size=80)
+#     # maze.draw_maze(size=80)
+#     print(a, b, (len(a)+len(b)))
+#     # maze.print_coordinates()
 
 
 
