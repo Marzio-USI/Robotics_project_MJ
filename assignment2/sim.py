@@ -26,6 +26,7 @@ except:
     print ('appropriately adjust the file "sim.py"')
     print ('----------------------------------------------------')
     print ('')
+    print(libfullpath)
 
 #ctypes wrapper prototypes
 c_GetJointPosition          = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.POINTER(ct.c_float), ct.c_int32)(("simxGetJointPosition", libsimx))
