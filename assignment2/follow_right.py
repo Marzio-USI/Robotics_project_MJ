@@ -15,18 +15,23 @@ dir_path2 = '/home/robotics23/dev_ws/src/assignment2/assignment2'
 sys.path.append(dir_path1)
 sys.path.append(dir_path2)
 from maze_spawner import spawn_maze
+import os
 
 class ControllerNode(Node):
     def __init__(self):
         super().__init__('controller_node')
 
-        *_, end_point = spawn_maze(size=50) 
+        nodes, _, edges,start_point,  end_point = spawn_maze(size=50)
+        
+        with open('/home/robotics23/dev_ws/src/assignment2/assignment2/nodes.txt' , 'w+') as f:
+            f.write(str(nodes))
+            for i in range(edges.shape[0]):
+                f.write(str(edges[i]))
+        f.close()
 
-        self.end_pose = (
-            end_point[0],
-            end_point[1], 
-            0.0
-        )
+        self.get_logger().info('init pos of thymio (global) x={}, y={}'.format(*start_point))
+
+        self.end_pose = self.global_to_local(start_point, end_point)
         
         # Create attributes to store odometry pose and velocity
         self.odom_pose = None
@@ -63,7 +68,15 @@ class ControllerNode(Node):
         self.start_time = 0.0
         self.angle_turn = 0.0
         self.time_to_turn = 0.0
-    
+
+    def global_to_local(self, start, coord_to_transform):
+        x_local : float = coord_to_transform[0] - start[0]
+        y_local : float = coord_to_transform[1] - start[1]
+        return (
+            x_local,
+            y_local,
+            0.0
+        )    
 
     def proximity_callback(self, message):
         distance  = message.range
@@ -146,8 +159,11 @@ class ControllerNode(Node):
             if self.euclidean_distance(current_pose, self.end_pose) < 0.26:
                 self.stop()
                 return
-            elif self.euclidean_distance(current_pose, self.end_pose) < 1.5:
-                self.get_logger().info('distance to goal = {}'.format(self.euclidean_distance(current_pose, self.end_pose)))
+            else:
+                self.get_logger().info(
+                    'Distance to goal is: {}'.format(self.euclidean_distance(current_pose, self.end_pose)),
+                    throttle_duration_sec=0.5 # Throttle logging frequency to max 2Hz
+                )
 
 
         # robot has no right wall and no front wall
