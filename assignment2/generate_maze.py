@@ -3,6 +3,22 @@ import random
 
 import networkx as nx
 import matplotlib.pyplot as plt
+import os
+import sys
+dir_path = os.path.dirname(os.path.abspath(__file__))
+dir_path2 = '/home/robotics23/dev_ws/src/assignment2'
+dir_path3 = '/home/robotics23/dev_ws/src/assignment2/assignment2'
+# dir_path3 = '/home/robotics23/dev_ws/src/assignment2/assignment2'
+# dir_path4 = '/home/robotics23/apps/CoppeliaSim_Edu_V4_4_0_rev0_Ubuntu22_04/programming/legacyRemoteApi/remoteApiBindings/lib/lib/Ubuntu20_04'
+dir_path5 = '/home/robotics23/apps/CoppeliaSim_Edu_V4_4_0_rev0_Ubuntu22_04/programming/zmqRemoteApi/clients/python'
+# Add the directory to sys.path
+sys.path.append(dir_path)
+sys.path.append(dir_path2)
+sys.path.append(dir_path3)
+# sys.path.append(dir_path4)
+sys.path.append(dir_path5)
+from copy import deepcopy
+from PathPlanning import *
 
 n_nodes = 10*10
 
@@ -175,38 +191,37 @@ class GraphMaze:
 
 
 
-# if __name__ == '__main__':
-#     maze = GraphMaze()
-#     for i in range(90, -1, -10):
-#         for j in range(10):
-#             print(maze.node_coordinates[i+j], end=' ')
-#         print('')
+if __name__ == '__main__':
+    maze = GraphMaze()
+    nodes, verticals, horizontals, edges, cood_vert, cood_horz = maze.generate_maze(size=60)
+    start = np.random.choice(nodes)
+    end = np.random.choice(np.delete(deepcopy(nodes), start))
 
-#     start = np.random.choice(np.arange(0, 100))
-#     print(start)
+    # maze.draw_maze()
+    # print(np.where(edges[0]==1)[0].tolist())
+    
 
-#     print(maze.node_coordinates[start])
+    print(start, end)
+    algo = DFS(nodes, edges, start, end)
+    path = algo.compute()
 
-#     print('CONVERTING')
+    print('DFS', path)
 
-#     new_coords = global_to_local(start, maze.node_coordinates)
+    algo2 = BFS(nodes, edges, start, end)
+    path = algo2.compute()
 
-#     maze = GraphMaze()
-#     for i in range(90, -1, -10):
-#         for j in range(10):
-#             k = new_coords[i+j][0], new_coords[i+j][1]
-#             print(k, end=' ')
-#         print('')
+    print('BFS', path)
 
-#     print(new_coords[start])
+    algo3 = Dijkstra(nodes, edges, start, end)
+    path = algo3.compute()
 
+    print('DJ', path)
 
 
-    # maze.print_coordinates()
-#     *_, a, b = maze.generate_maze(size=80)
-#     # maze.draw_maze(size=80)
-#     print(a, b, (len(a)+len(b)))
-#     # maze.print_coordinates()
+
+
+
+
 
 
 
