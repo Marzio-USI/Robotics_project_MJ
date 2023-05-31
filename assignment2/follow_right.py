@@ -14,24 +14,21 @@ dir_path1 = '/home/robotics23/dev_ws/src/assignment2'
 dir_path2 = '/home/robotics23/dev_ws/src/assignment2/assignment2'
 sys.path.append(dir_path1)
 sys.path.append(dir_path2)
-from maze_spawner import spawn_maze
+from maze_spawner import spawn_maze, get_thymio_position
 import os
 
 class ControllerNode(Node):
     def __init__(self):
         super().__init__('controller_node')
 
-        nodes, _, edges,start_point,  end_point = spawn_maze(size=50)
+        nodes, nodes_coords, edges, start_point, end_point = spawn_maze(size=54)
         
-        with open('/home/robotics23/dev_ws/src/assignment2/assignment2/nodes.txt' , 'w+') as f:
-            f.write(str(nodes))
-            for i in range(edges.shape[0]):
-                f.write(str(edges[i]))
-        f.close()
 
-        self.get_logger().info('init pos of thymio (global) x={}, y={}'.format(*start_point))
+        # realtive_node_coords = self.global_to_local(start_point, nodes_coords)
 
-        self.end_pose = self.global_to_local(start_point, end_point)
+        self.start_point = start_point
+        self.end_point = end_point
+
         
         # Create attributes to store odometry pose and velocity
         self.odom_pose = None
@@ -50,7 +47,6 @@ class ControllerNode(Node):
         self.proximity_left_subscriber = self.create_subscription(Range, 'proximity/left', self.proximity_callback_left, 10)
         self.proximity_right_subscriber = self.create_subscription(Range, 'proximity/right', self.proximity_callback_right, 10)
 
-        print('')
 
         # self.proximity_rear_left_subscriber = self.create_subscription(Range, 'proximity/rear_left',self.proximity_callback_back, 10)
         # self.proximity_rear_right_subscriber = self.create_subscription(Range, 'proximity/rear_right', self.proximity_callback_back, 10)
@@ -69,14 +65,12 @@ class ControllerNode(Node):
         self.angle_turn = 0.0
         self.time_to_turn = 0.0
 
-    def global_to_local(self, start, coord_to_transform):
-        x_local : float = coord_to_transform[0] - start[0]
-        y_local : float = coord_to_transform[1] - start[1]
-        return (
-            x_local,
-            y_local,
-            0.0
-        )    
+        self.i = 6
+
+        self.found_a_wall = False
+
+
+        
 
     def proximity_callback(self, message):
         distance  = message.range
@@ -113,30 +107,23 @@ class ControllerNode(Node):
         self.vel_publisher.publish(cmd_vel)
     
     def odom_callback(self, msg):
-        self.odom_pose = msg.pose.pose
-        self.odom_valocity = msg.twist.twist
+        # self.odom_pose = msg.pose.pose
+        # self.odom_valocity = msg.twist.twist
         
-        pose2d = self.pose3d_to_2d(self.odom_pose)
+        pose2d = self.pose3d_to_2d()
         
         self.get_logger().info(
-            "odometry: received pose (x: {:.2f}, y: {:.2f}, theta: {:.2f})".format(*pose2d),
+            "odometry: received pose (x: {:.2f}, y: {:.2f}".format(*pose2d),
              throttle_duration_sec=0.5 # Throttle logging frequency to max 2Hz
         )
     
-    def pose3d_to_2d(self, pose3):
-        quaternion = (
-            pose3.orientation.x,
-            pose3.orientation.y,
-            pose3.orientation.z,
-            pose3.orientation.w
-        )
-        
-        roll, pitch, yaw = tf_transformations.euler_from_quaternion(quaternion)
+    def pose3d_to_2d(self):
+        position = get_thymio_position()
         
         pose2 = (
-            pose3.position.x,  # x position
-            pose3.position.y,  # y position
-            yaw                # theta orientation
+            position[0],  # x position
+            position[1],  # y position
+            # yaw                # theta orientation
         )
         
         return pose2
@@ -154,20 +141,31 @@ class ControllerNode(Node):
         small_left_angle = math.pi/12
 
         # if you reach the goal stop
-        if self.odom_pose is not None:
-            current_pose = self.pose3d_to_2d(self.odom_pose)
-            if self.euclidean_distance(current_pose, self.end_pose) < 0.26:
-                self.stop()
-                return
-            else:
-                self.get_logger().info(
-                    'Distance to goal is: {}'.format(self.euclidean_distance(current_pose, self.end_pose)),
-                    throttle_duration_sec=0.5 # Throttle logging frequency to max 2Hz
-                )
+       
+        current_pose = self.pose3d_to_2d()
+        if self.euclidean_distance(current_pose, self.end_point) < 0.20:
+            self.stop()
+            self.get_logger().info('goal reached')
+            raise KeyboardInterrupt()
+            return
+            # else:
+            #     self.get_logger().info(
+            #         'Distance to goal is: {}'.format(self.euclidean_distance(current_pose, self.end_point)),
+            #         throttle_duration_sec=0.5 # Throttle logging frequency to max 2Hz
+            #     )
+     
+        if not self.found_a_wall:
+            cmd_vel.linear.x = 0.3
+            cmd_vel.angular.z = right_angle * self.i
+            self.i *= 0.90
+            if self.info_stop_right > 0:
+                self.found_a_wall= True
 
-
+            elif self.info_stop_left > 0:
+                cmd_vel.linear.x = 0.05
+                cmd_vel.angular.z = left_angle
         # robot has no right wall and no front wall
-        if self.info_stop_right < 0 and (self.info_stop < 0):
+        elif self.info_stop_right < 0 and (self.info_stop < 0):
             cmd_vel.linear.x = 0.3
             cmd_vel.angular.z = right_angle * 6
         elif self.info_stop_right > 0 and (self.info_stop < 0):

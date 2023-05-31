@@ -106,7 +106,7 @@ class GraphMaze:
             self.edges[in_nodes, out_nodes] = 0
             self.edges[out_nodes, in_nodes] = 0
             if self.dfs(in_nodes, out_nodes):
-                print("DFS: Maze is connected")
+                # print("DFS: Maze is connected")
                 if self.is_a_vertical_edge(in_nodes, out_nodes):
                     verticals.append((in_nodes, out_nodes))
                 elif self.is_a_horizontal_edge(in_nodes, out_nodes):
@@ -115,7 +115,7 @@ class GraphMaze:
                     print("Error: Invalid edge")
                 i += 1
             else:
-                print('edge cannot be removed')
+                # print('edge cannot be removed')
                 self.edges[in_nodes, out_nodes] = 1
                 self.edges[out_nodes, in_nodes] = 1
                 do_not_pick.append((in_nodes, out_nodes))
@@ -173,8 +173,36 @@ class GraphMaze:
         plt.show()
 
 
+
+
 # if __name__ == '__main__':
 #     maze = GraphMaze()
+#     for i in range(90, -1, -10):
+#         for j in range(10):
+#             print(maze.node_coordinates[i+j], end=' ')
+#         print('')
+
+#     start = np.random.choice(np.arange(0, 100))
+#     print(start)
+
+#     print(maze.node_coordinates[start])
+
+#     print('CONVERTING')
+
+#     new_coords = global_to_local(start, maze.node_coordinates)
+
+#     maze = GraphMaze()
+#     for i in range(90, -1, -10):
+#         for j in range(10):
+#             k = new_coords[i+j][0], new_coords[i+j][1]
+#             print(k, end=' ')
+#         print('')
+
+#     print(new_coords[start])
+
+
+
+    # maze.print_coordinates()
 #     *_, a, b = maze.generate_maze(size=80)
 #     # maze.draw_maze(size=80)
 #     print(a, b, (len(a)+len(b)))

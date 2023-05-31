@@ -30,11 +30,18 @@ import time
 from copy import deepcopy
 
 
+client = None
+sim = None
+thymio_handle= None
 
+def get_thymio_position():
+    global client, sim, thymio_handle  
+    position = sim.getObjectPosition(thymio_handle, -1)
+    return position
 
 
 def spawn_maze(size=40):
-        
+    global client, sim, thymio_handle    
     print('start')
     client = RemoteAPIClient()
     print('connected')
@@ -122,7 +129,7 @@ def spawn_maze(size=40):
     sim.setObjectPosition(wall_handle, -1, [end_point_x, end_point_y , 0.45])
     sim.setShapeColor(wall_handle, None, sim.colorcomponent_ambient_diffuse, [1.0, 0.0, 0.0])
 
-    return nodes, node_cord, edges, (start_point_x, start_point_y), (end_point_x, end_point_y)
+    return nodes, node_cord, edges, (start_point_x, start_point_y, 0.0), (end_point_x, end_point_y, 0.0)
 
 
 # if __name__ == '__main__':
