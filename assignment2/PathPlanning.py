@@ -88,6 +88,7 @@ class Dijkstra(PathPlanning):
     def dijkstra_path(self, g):
         n = len(g)
         print(f'len graph:{n}')
+        print(g)
         visited = [False] * n
         visited[self.start_node] = True
         distances = [float('inf')] * n
@@ -100,11 +101,13 @@ class Dijkstra(PathPlanning):
 
         for _ in range(1, len(g)):
             next_node = self.select_min(visited, distances)
+            if next_node is None:
+                break
             visited[next_node] = True
             for start, end, cost in g[next_node]:
-                if distances[start] + cost < distances[end]:
+                if not visited[end] and distances[start] + cost < distances[end]:
                     distances[end] = distances[start] + cost
-                    predecessors[end] = start
+                    predecessors[end] = next_node
 
         path = []
         current_node = self.end_node
@@ -127,7 +130,7 @@ adj_mat = adj_mat.replace("][", "],[")
 nodes_list = ast.literal_eval(nodes)
 adj_mat_list = ast.literal_eval(adj_mat)
 #%%
-path_planning = Dijkstra(nodes_list, adj_mat_list, 5, 97)
+path_planning = Dijkstra(nodes_list, adj_mat_list, 6, 99)
 path = path_planning.compute()
 print(path)
 # %%
