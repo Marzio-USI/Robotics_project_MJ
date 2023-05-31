@@ -1,5 +1,7 @@
 #%%
 import ast
+from collections import deque
+
 class PathPlanning:
     def __init__(self, nodes_list, adj_matrix, Xini, Xfin):
         self.nodes_list = nodes_list
@@ -11,6 +13,9 @@ class PathPlanning:
         self.nodes = len(self.nodes_list)
         self.edges = [[(i, j, 1) for j in range(self.nodes) if self.adj_matrix[i][j] == 1] for i in range(self.nodes)]
         
+        # Remove duplicates
+        # self.edges = [list(set(i)) for i in self.edges]
+        
         self.graph = [[] for _ in range(self.nodes)]
         
         for i in range(len(self.edges)):
@@ -18,22 +23,6 @@ class PathPlanning:
             n1, n2, self.cost = self.edges[i][0]
             self.graph[n1].append((n1,n2,self.cost))
             self.graph[n2].append((n2,n1,self.cost))
-            
-    def read_data(self, file_name):
-        with open(file_name, 'r') as f:
-            lines = f.readlines()
-
-        # First line is nodes list
-        nodes_list = list(map(int, lines[0].strip().replace('[', '').replace(']', '').split()))
-
-        # Remaining lines are adjacency matrix
-        adjacency_matrix = []
-        for line in lines[1:]:
-            row = list(map(int, line.strip().replace('[', '').replace(']', '').split()))
-            adjacency_matrix.append(row)
-
-        return nodes_list, adjacency_matrix
-
 
         
     def compute(self):
@@ -41,12 +30,33 @@ class PathPlanning:
 
 
 class DFS(PathPlanning):
-    def __init__(self, nodes_list, adj_matrix):
-        super().__init__(nodes_list, adj_matrix)
-        
+    def __init__(self, nodes_list, adj_matrix, Xini, Xfin):
+        super().__init__(nodes_list, adj_matrix, Xini, Xfin)
+        self.start_node = Xini
+        self.end_node = Xfin
     
+    def dfs_path(self, g):
+        visited = [False] * len(g)
+        predecessors = [None] * len(g)
+        self.rec_profundidad(g, visited, self.start_node, predecessors)
+
+        path = []
+        current_node = self.end_node
+        while current_node is not None:
+            path.append(current_node)
+            current_node = predecessors[current_node]
+        path.reverse()
+        return path
+
+    def rec_profundidad(self, g, visited, i, predecessors):
+        visited[i] = True
+        for _, next_node, _ in g[i]:
+            if not visited[next_node]:
+                predecessors[next_node] = i
+                self.rec_profundidad(g, visited, next_node, predecessors)
+
     def compute(self):
-        pass
+        return self.dfs_path(self.graph)
     
 
 
@@ -59,12 +69,41 @@ class RRTStar(PathPlanning):
         pass
 
 
+
 class BFS(PathPlanning):
-    def __init__(self, nodes_list, adj_matrix):
-        super().__init__(nodes_list, adj_matrix)
+    def __init__(self, nodes_list, adj_matrix, Xini, Xfin):
+        super().__init__(nodes_list, adj_matrix, Xini, Xfin)
+        self.start_node = Xini
+        self.end_node = Xfin
+
+    def bfs_path(self, g):
+        visited = [False] * len(g)
+        predecessors = [None] * len(g)
+        visited[self.start_node] = True
+
+        q = deque()
+        q.append(self.start_node)
+
+        while q:
+            node = q.popleft()
+            for _, next_node, _ in g[node]:
+                if not visited[next_node]:
+                    visited[next_node] = True
+                    predecessors[next_node] = node
+                    q.append(next_node)
+
+        path = []
+        current_node = self.end_node
+        while current_node is not None:
+            path.append(current_node)
+            current_node = predecessors[current_node]
+        path.reverse()
+
+        return path
 
     def compute(self):
-        pass
+        return self.bfs_path(self.graph)
+
     
 class Dijkstra(PathPlanning):
     def __init__(self, nodes_list, adj_matrix, Xini, Xfin):
@@ -130,7 +169,15 @@ adj_mat = adj_mat.replace("][", "],[")
 nodes_list = ast.literal_eval(nodes)
 adj_mat_list = ast.literal_eval(adj_mat)
 #%%
-path_planning = Dijkstra(nodes_list, adj_mat_list, 6, 99)
+path_planning = Dijkstra(nodes_list, adj_mat_list, 1, 99)
+path = path_planning.compute()
+print(path)
+# %%
+path_planning = DFS(nodes_list, adj_mat_list, 1, 99)
+path = path_planning.compute()
+print(path)
+# %%
+path_planning = BFS(nodes_list, adj_mat_list, 1, 99)
 path = path_planning.compute()
 print(path)
 # %%
