@@ -8,9 +8,30 @@ import time
 import sys
 from sensor_msgs.msg import Range
 import math
+from math import sqrt
+
+dir_path1 = '/home/robotics23/dev_ws/src/assignment2'
+dir_path2 = '/home/robotics23/dev_ws/src/assignment2/assignment2'
+sys.path.append(dir_path1)
+sys.path.append(dir_path2)
+from maze_spawner import spawn_maze
+import os
+
 class ControllerNode(Node):
     def __init__(self):
         super().__init__('controller_node')
+
+        nodes, _, edges,start_point,  end_point = spawn_maze(size=50)
+        
+        with open('/home/robotics23/dev_ws/src/assignment2/assignment2/nodes.txt' , 'w+') as f:
+            f.write(str(nodes))
+            for i in range(edges.shape[0]):
+                f.write(str(edges[i]))
+        f.close()
+
+        self.get_logger().info('init pos of thymio (global) x={}, y={}'.format(*start_point))
+
+        self.end_pose = self.global_to_local(start_point, end_point)
         
         # Create attributes to store odometry pose and velocity
         self.odom_pose = None
@@ -29,9 +50,10 @@ class ControllerNode(Node):
         self.proximity_left_subscriber = self.create_subscription(Range, 'proximity/left', self.proximity_callback_left, 10)
         self.proximity_right_subscriber = self.create_subscription(Range, 'proximity/right', self.proximity_callback_right, 10)
 
+        print('')
+
         # self.proximity_rear_left_subscriber = self.create_subscription(Range, 'proximity/rear_left',self.proximity_callback_back, 10)
         # self.proximity_rear_right_subscriber = self.create_subscription(Range, 'proximity/rear_right', self.proximity_callback_back, 10)
-        
         # NOTE: we're using relative names to specify the topics (i.e., without a 
         # leading /). ROS resolves relative names by concatenating them with the 
         # namespace in which this node has been started, thus allowing us to 
@@ -46,26 +68,37 @@ class ControllerNode(Node):
         self.start_time = 0.0
         self.angle_turn = 0.0
         self.time_to_turn = 0.0
-    
+
+    def global_to_local(self, start, coord_to_transform):
+        x_local : float = coord_to_transform[0] - start[0]
+        y_local : float = coord_to_transform[1] - start[1]
+        return (
+            x_local,
+            y_local,
+            0.0
+        )    
 
     def proximity_callback(self, message):
         distance  = message.range
         if distance >= 0 and distance < 0.2:
             self.info_stop = distance
+            # self.get_logger().info('detrecting front')
         else:
             self.info_stop = -1.0
 
     def proximity_callback_left(self, message):
         distance  = message.range
-        if distance >= 0 and distance < 0.2:
+        if distance >= 0 and distance < 0.3:
             self.info_stop_left = distance
+            # self.get_logger().info('detrecting left')
         else:
             self.info_stop_left = -1.0
 
     def proximity_callback_right(self, message):
         distance  = message.range
-        if distance >= 0 and distance < 0.2:
+        if distance >= 0 and distance < 0.3:
             self.info_stop_right = distance
+            # self.get_logger().info('detrecting right')
         else:
             self.info_stop_right = -1.0
 
@@ -108,29 +141,54 @@ class ControllerNode(Node):
         
         return pose2
     
+    def euclidean_distance(self, goal_pose, current_pose):
+        """Euclidean distance between current pose and the goal."""
+        return sqrt(pow((goal_pose[0] - current_pose[0]), 2) +
+                    pow((goal_pose[1] - current_pose[1]), 2))
+    
     def update_callback(self):
         cmd_vel = Twist() 
         right_angle = -math.pi/6
         left_angle = math.pi/6
         small_right_angle = -math.pi/12
         small_left_angle = math.pi/12
+
+        # if you reach the goal stop
+        if self.odom_pose is not None:
+            current_pose = self.pose3d_to_2d(self.odom_pose)
+            if self.euclidean_distance(current_pose, self.end_pose) < 0.26:
+                self.stop()
+                return
+            else:
+                self.get_logger().info(
+                    'Distance to goal is: {}'.format(self.euclidean_distance(current_pose, self.end_pose)),
+                    throttle_duration_sec=0.5 # Throttle logging frequency to max 2Hz
+                )
+
+
         # robot has no right wall and no front wall
         if self.info_stop_right < 0 and (self.info_stop < 0):
             cmd_vel.linear.x = 0.3
             cmd_vel.angular.z = right_angle * 6
         elif self.info_stop_right > 0 and (self.info_stop < 0):
-            cmd_vel.linear.x = 0.8
+            cmd_vel.linear.x = 0.5
             # check for collision on the right 
             if self.info_stop_right < 0.1:
+                cmd_vel.linear.x = 0.1
                 cmd_vel.angular.z = small_left_angle
             elif self.info_stop_right > 0.15:
+                cmd_vel.linear.x = 0.1
                 cmd_vel.angular.z = small_right_angle
             else:
-                cmd_vel.linear.x = 1.5
+                cmd_vel.linear.x = 0.3
                 cmd_vel.angular.z = 0.0
         elif self.info_stop_right > 0 and (self.info_stop > 0):
             # rotate to the left
             cmd_vel.linear.x = 0.0
+            cmd_vel.angular.z = left_angle
+        elif self.info_stop > 0 and (self.info_stop_right < 0) and (self.info_stop_left < 0):
+            # go left
+            cmd_vel.linear.x = 0.1
             cmd_vel.angular.z = left_angle
         else:
             cmd_vel.linear.x = 0.3
