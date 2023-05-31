@@ -23,10 +23,22 @@ sys.path.append(dir_path2)
 sys.path.append(dir_path5)
 # print('looking at', sys.path)
 # print('dir', dir_path)
-
+import numpy as np
 # import sim
 from zmqRemoteApi import RemoteAPIClient
 import time
+from copy import deepcopy
+
+sim_objectspecialproperty_collidable   =0x000001
+sim_objectspecialproperty_measurable  =0x000002
+sim_objectspecialproperty_detectable_ultrasonic =0x000004
+sim_objectspecialproperty_detectable_infrared =0x000008
+sim_objectspecialproperty_detectable_laser =0x000010
+sim_objectspecialproperty_detectable_inductive =0x000020
+sim_objectspecialproperty_detectable_capacitive =0x000040
+sim_objectspecialproperty_renderable =0x000080
+
+
 
 def spawn_maze(size=40):
         
@@ -42,6 +54,19 @@ def spawn_maze(size=40):
     nodes, verticals, horizontals, edges, cood_vert, cood_horz =  maze.generate_maze(size=size)
     node_cord = maze.node_coordinates
 
+    start_point = np.random.choice(nodes)
+    start_point_x, start_point_y = node_cord[start_point]
+
+    end_point = np.random.choice(np.delete(deepcopy(nodes), start_point))
+    end_point_x, end_point_y = node_cord[end_point]
+
+    thymio_handle = sim.getObject("/MightyThymio")
+    sim.setObjectPosition(thymio_handle, -1, [start_point_x, start_point_y, 0.501])
+
+
+    properties_objects = sim_objectspecialproperty_collidable | sim_objectspecialproperty_measurable | sim_objectspecialproperty_detectable_ultrasonic | sim_objectspecialproperty_detectable_infrared | sim_objectspecialproperty_detectable_laser | sim_objectspecialproperty_detectable_inductive | sim_objectspecialproperty_detectable_capacitive | sim_objectspecialproperty_renderable
+
+
     # maze.draw_maze()
 
     wall_size_x = [0.6, 0.1, 1.0] 
@@ -49,11 +74,23 @@ def spawn_maze(size=40):
 
     for (v_x, v_y) in cood_vert:
         wall_handle = sim.createPrimitiveShape(cuboid_type, wall_size_x)
-        sim.setObjectPosition(wall_handle, -1, [v_x, v_y, 0.5])
+        # sim.computeMassAndInertia(wall_handle, 1.0)
+        sim.setObjectPosition(wall_handle, -1, [v_x, v_y, 0.1])
+        # res = sim.setObjectSpecialProperty(wall_handle, sim.objectspecialproperty_collidable)
+        sim.setObjectSpecialProperty(wall_handle, properties_objects)
+        # print(res)
+        # sim.resetDynamicObject(wall_handle)
 
     for (h_x, h_y) in cood_horz:
         wall_handle = sim.createPrimitiveShape(cuboid_type, wall_size_y)
-        sim.setObjectPosition(wall_handle, -1, [h_x, h_y, 0.5])
+        # res = sim.computeMassAndInertia(wall_handle, 1.0)
+        # print(res)
+        sim.setObjectPosition(wall_handle, -1, [h_x, h_y, 0.1])
+        sim.setObjectSpecialProperty(wall_handle, properties_objects)
+
+        # res = sim.setObjectSpecialProperty(wall_handle, sim.objectspecialproperty_collidable)
+        # print(res)
+        # sim.resetDynamicObject(wall_handle)
 
     # for (n_x, n_y) in node_cord:
     #     wall_handle = sim.createPrimitiveShape(cuboid_type, [0.0, 0.0, 0.5])
@@ -79,7 +116,14 @@ def spawn_maze(size=40):
     wall_handle = sim.createPrimitiveShape(cuboid_type, wall_left_right)
     sim.setObjectPosition(wall_handle, -1, [(2.5+0.05), 0.0 , 0.5])
 
+    # end_point (provvisorio)
+    wall_handle = sim.createPrimitiveShape(cuboid_type, [0.02, 0.02, 1.0])
+    sim.setObjectPosition(wall_handle, -1, [end_point_x, end_point_y , 0.5])
+    sim.setShapeColor(wall_handle, None, sim.colorcomponent_ambient_diffuse, [1.0, 0.0, 0.0])
 
-if __name__ == '__main__':
-    # print('looking at', sys.path)
-    spawn_maze()
+    return nodes, node_cord, edges, (start_point_x, start_point_y), (end_point_x, end_point_y)
+
+
+# if __name__ == '__main__':
+#     # print('looking at', sys.path)
+#     spawn_maze()
