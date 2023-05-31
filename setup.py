@@ -26,7 +26,6 @@ setup(
             'task3=assignment2.task3:main',
             'bonus=assignment2.bonus:main',
             'right=assignment2.follow_right:main',
-            'maze=assignment2.maze_spawner:main',
         ],
     },
 )

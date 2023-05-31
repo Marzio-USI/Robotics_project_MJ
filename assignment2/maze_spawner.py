@@ -29,14 +29,7 @@ from zmqRemoteApi import RemoteAPIClient
 import time
 from copy import deepcopy
 
-sim_objectspecialproperty_collidable   =0x000001
-sim_objectspecialproperty_measurable  =0x000002
-sim_objectspecialproperty_detectable_ultrasonic =0x000004
-sim_objectspecialproperty_detectable_infrared =0x000008
-sim_objectspecialproperty_detectable_laser =0x000010
-sim_objectspecialproperty_detectable_inductive =0x000020
-sim_objectspecialproperty_detectable_capacitive =0x000040
-sim_objectspecialproperty_renderable =0x000080
+
 
 
 
@@ -64,9 +57,7 @@ def spawn_maze(size=40):
     sim.setObjectPosition(thymio_handle, -1, [start_point_x, start_point_y, 0.501])
 
 
-    properties_objects = sim_objectspecialproperty_collidable | sim_objectspecialproperty_measurable | sim_objectspecialproperty_detectable_ultrasonic | sim_objectspecialproperty_detectable_infrared | sim_objectspecialproperty_detectable_laser | sim_objectspecialproperty_detectable_inductive | sim_objectspecialproperty_detectable_capacitive | sim_objectspecialproperty_renderable
-
-
+    # properties_objects = sim.objectspecialproperty_collidable sim.objectspecialproperty_measurable or sim.objectspecialproperty_detectable
     # maze.draw_maze()
 
     wall_size_x = [0.6, 0.1, 1.0] 
@@ -75,22 +66,24 @@ def spawn_maze(size=40):
     for (v_x, v_y) in cood_vert:
         wall_handle = sim.createPrimitiveShape(cuboid_type, wall_size_x)
         # sim.computeMassAndInertia(wall_handle, 1.0)
-        sim.setObjectPosition(wall_handle, -1, [v_x, v_y, 0.1])
+        sim.setObjectPosition(wall_handle, -1, [v_x, v_y, 0.45])
         # res = sim.setObjectSpecialProperty(wall_handle, sim.objectspecialproperty_collidable)
-        sim.setObjectSpecialProperty(wall_handle, properties_objects)
+        # sim.setObjectSpecialProperty(wall_handle, properties_objects)
+        sim.setObjectInt32Param(wall_handle, sim.shapeintparam_respondable,1)
         # print(res)
-        # sim.resetDynamicObject(wall_handle)
+        sim.resetDynamicObject(wall_handle)
 
     for (h_x, h_y) in cood_horz:
         wall_handle = sim.createPrimitiveShape(cuboid_type, wall_size_y)
         # res = sim.computeMassAndInertia(wall_handle, 1.0)
         # print(res)
-        sim.setObjectPosition(wall_handle, -1, [h_x, h_y, 0.1])
-        sim.setObjectSpecialProperty(wall_handle, properties_objects)
+        sim.setObjectPosition(wall_handle, -1, [h_x, h_y, 0.45])
+        # sim.setObjectSpecialProperty(wall_handle, properties_objects)
+        sim.setObjectInt32Param(wall_handle, sim.shapeintparam_respondable,1)
 
         # res = sim.setObjectSpecialProperty(wall_handle, sim.objectspecialproperty_collidable)
         # print(res)
-        # sim.resetDynamicObject(wall_handle)
+        sim.resetDynamicObject(wall_handle)
 
     # for (n_x, n_y) in node_cord:
     #     wall_handle = sim.createPrimitiveShape(cuboid_type, [0.0, 0.0, 0.5])
@@ -102,23 +95,31 @@ def spawn_maze(size=40):
 
     #up 
     wall_handle = sim.createPrimitiveShape(cuboid_type, wall_up_bottom)
-    sim.setObjectPosition(wall_handle, -1, [0.0, 2.5+0.05, 0.5])
+    sim.setObjectPosition(wall_handle, -1, [0.0, 2.5+0.05, 0.45])
+    sim.setObjectInt32Param(wall_handle, sim.shapeintparam_respondable,1)
+    sim.resetDynamicObject(wall_handle)
 
     #bottom
     wall_handle = sim.createPrimitiveShape(cuboid_type, wall_up_bottom)
-    sim.setObjectPosition(wall_handle, -1, [0.0, -(2.5+0.05), 0.5])
+    sim.setObjectPosition(wall_handle, -1, [0.0, -(2.5+0.05), 0.45])
+    sim.setObjectInt32Param(wall_handle, sim.shapeintparam_respondable,1)
+    sim.resetDynamicObject(wall_handle)
 
     #left
     wall_handle = sim.createPrimitiveShape(cuboid_type, wall_left_right)
-    sim.setObjectPosition(wall_handle, -1, [-(2.5+0.05), 0.0 , 0.5])
+    sim.setObjectPosition(wall_handle, -1, [-(2.5+0.05), 0.0 , 0.45])
+    sim.setObjectInt32Param(wall_handle, sim.shapeintparam_respondable,1)
+    sim.resetDynamicObject(wall_handle)
 
     #right
     wall_handle = sim.createPrimitiveShape(cuboid_type, wall_left_right)
-    sim.setObjectPosition(wall_handle, -1, [(2.5+0.05), 0.0 , 0.5])
+    sim.setObjectPosition(wall_handle, -1, [(2.5+0.05), 0.0 , 0.45])
+    sim.setObjectInt32Param(wall_handle, sim.shapeintparam_respondable,1)
+    sim.resetDynamicObject(wall_handle)
 
     # end_point (provvisorio)
     wall_handle = sim.createPrimitiveShape(cuboid_type, [0.02, 0.02, 1.0])
-    sim.setObjectPosition(wall_handle, -1, [end_point_x, end_point_y , 0.5])
+    sim.setObjectPosition(wall_handle, -1, [end_point_x, end_point_y , 0.45])
     sim.setShapeColor(wall_handle, None, sim.colorcomponent_ambient_diffuse, [1.0, 0.0, 0.0])
 
     return nodes, node_cord, edges, (start_point_x, start_point_y), (end_point_x, end_point_y)

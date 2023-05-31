@@ -69,23 +69,23 @@ class ControllerNode(Node):
         distance  = message.range
         if distance >= 0 and distance < 0.2:
             self.info_stop = distance
-            self.get_logger().info('detrecting front')
+            # self.get_logger().info('detrecting front')
         else:
             self.info_stop = -1.0
 
     def proximity_callback_left(self, message):
         distance  = message.range
-        if distance >= 0 and distance < 0.2:
+        if distance >= 0 and distance < 0.3:
             self.info_stop_left = distance
-            self.get_logger().info('detrecting left')
+            # self.get_logger().info('detrecting left')
         else:
             self.info_stop_left = -1.0
 
     def proximity_callback_right(self, message):
         distance  = message.range
-        if distance >= 0 and distance < 0.2:
+        if distance >= 0 and distance < 0.3:
             self.info_stop_right = distance
-            self.get_logger().info('detrecting right')
+            # self.get_logger().info('detrecting right')
         else:
             self.info_stop_right = -1.0
 
@@ -105,10 +105,10 @@ class ControllerNode(Node):
         
         pose2d = self.pose3d_to_2d(self.odom_pose)
         
-        # self.get_logger().info(
-        #     "odometry: received pose (x: {:.2f}, y: {:.2f}, theta: {:.2f})".format(*pose2d),
-        #      throttle_duration_sec=0.5 # Throttle logging frequency to max 2Hz
-        # )
+        self.get_logger().info(
+            "odometry: received pose (x: {:.2f}, y: {:.2f}, theta: {:.2f})".format(*pose2d),
+             throttle_duration_sec=0.5 # Throttle logging frequency to max 2Hz
+        )
     
     def pose3d_to_2d(self, pose3):
         quaternion = (
@@ -143,9 +143,11 @@ class ControllerNode(Node):
         # if you reach the goal stop
         if self.odom_pose is not None:
             current_pose = self.pose3d_to_2d(self.odom_pose)
-            if self.euclidean_distance(current_pose, self.end_pose) < 0.01:
+            if self.euclidean_distance(current_pose, self.end_pose) < 0.26:
                 self.stop()
                 return
+            elif self.euclidean_distance(current_pose, self.end_pose) < 1.5:
+                self.get_logger().info('distance to goal = {}'.format(self.euclidean_distance(current_pose, self.end_pose)))
 
 
         # robot has no right wall and no front wall
@@ -153,18 +155,24 @@ class ControllerNode(Node):
             cmd_vel.linear.x = 0.3
             cmd_vel.angular.z = right_angle * 6
         elif self.info_stop_right > 0 and (self.info_stop < 0):
-            cmd_vel.linear.x = 0.8
+            cmd_vel.linear.x = 0.5
             # check for collision on the right 
             if self.info_stop_right < 0.1:
+                cmd_vel.linear.x = 0.1
                 cmd_vel.angular.z = small_left_angle
             elif self.info_stop_right > 0.15:
+                cmd_vel.linear.x = 0.1
                 cmd_vel.angular.z = small_right_angle
             else:
-                cmd_vel.linear.x = 1.5
+                cmd_vel.linear.x = 0.3
                 cmd_vel.angular.z = 0.0
         elif self.info_stop_right > 0 and (self.info_stop > 0):
             # rotate to the left
             cmd_vel.linear.x = 0.0
+            cmd_vel.angular.z = left_angle
+        elif self.info_stop > 0 and (self.info_stop_right < 0) and (self.info_stop_left < 0):
+            # go left
+            cmd_vel.linear.x = 0.1
             cmd_vel.angular.z = left_angle
         else:
             cmd_vel.linear.x = 0.3
