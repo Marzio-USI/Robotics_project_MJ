@@ -5,17 +5,18 @@ import numpy as np
 from geometry_msgs.msg import Twist, Pose
 from nav_msgs.msg import Odometry
 import time
-import sys
+
 from sensor_msgs.msg import Range
 import math
 from math import sqrt
-
-dir_path1 = '/home/robotics23/dev_ws/src/assignment2'
-dir_path2 = '/home/robotics23/dev_ws/src/assignment2/assignment2'
-sys.path.append(dir_path1)
-sys.path.append(dir_path2)
-from maze_spawner import spawn_maze, get_thymio_position, get_thymio_orientation
+import sys
 import os
+dir_path  = os.path.dirname(os.path.abspath(__file__))
+print(dir_path)
+sys.path.append(dir_path)
+
+from maze_spawner import spawn_maze, get_thymio_position, get_thymio_orientation
+
 
 from PathPlanning import *
 

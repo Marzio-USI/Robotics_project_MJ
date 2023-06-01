@@ -184,9 +184,7 @@ class GraphMaze:
 
 
 if __name__ == '__main__':
-    maze = GraphMaze()
-    maze.generate_maze(size=40)
-    maze.draw_maze()
+    pass
 #     nodes, verticals, horizontals, edges, cood_vert, cood_horz = maze.generate_maze(size=60)
 #     start = np.random.choice(nodes)
 #     end = np.random.choice(np.delete(deepcopy(nodes), start))
