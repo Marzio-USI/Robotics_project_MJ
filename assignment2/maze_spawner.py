@@ -70,7 +70,6 @@ def spawn_maze(size=40):
 
     wall_size_x = [0.6, 0.1, 1.0] 
     wall_size_y = [0.1, 0.6, 1.0]
-    # properties_objects = sim_objectspecialproperty_collidable | sim_objectspecialproperty_measurable | sim_objectspecialproperty_detectable_ultrasonic | sim_objectspecialproperty_detectable_infrared | sim_objectspecialproperty_detectable_laser | sim_objectspecialproperty_detectable_inductive | sim_objectspecialproperty_detectable_capacitive | sim_objectspecialproperty_renderable
 
     for (v_x, v_y) in cood_vert:
         wall_handle = sim.createPrimitiveShape(cuboid_type, wall_size_x)
