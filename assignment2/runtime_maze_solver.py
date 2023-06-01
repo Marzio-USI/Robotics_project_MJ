@@ -110,32 +110,14 @@ class ControllerNode(Node):
 
 
     def update_callback(self):
+        thymio_position = self.pose3d_to_2d(get_thymio_position())
+        thymio_orientation = get_thymio_orientation()
         if self.prev_node is not None:
             # if sensor detects something it remove edges and recompute the path
             x_s, y_s, _ = self.coords_to_pose2d(self.nodes_coords[self.prev_node])
             x_f, y_f, _ = self.coords_to_pose2d(self.nodes_coords[self.next_node])
-            if self.info_stop > 0  and (self.is_upper_edge(x_s, y_s, x_f, y_f)):
-                self.runtime_edges[self.prev_node, self.next_node] = 0
-                self.runtime_edges[self.next_node, self.prev_node] = 0
-                self.algo = get_algorithm('BFS', self.nodes, self.runtime_edges, self.prev_node, self.node_end)
-                self.path = self.algo.compute()
-                self.prev_node = None
-                self.next_node = self.path.pop(0)
-            elif self.info_stop > 0 and (self.is_lower_edge(x_s, y_s, x_f, y_f)):
-                self.runtime_edges[self.prev_node, self.next_node] = 0
-                self.runtime_edges[self.next_node, self.prev_node] = 0
-                self.algo = get_algorithm('BFS', self.nodes, self.runtime_edges, self.prev_node, self.node_end)
-                self.path = self.algo.compute()
-                self.prev_node = None
-                self.next_node = self.path.pop(0)
-            elif self.info_stop_left > 0 and (self.is_right_edge(x_s, y_s, x_f, y_f)):
-                self.runtime_edges[self.prev_node, self.next_node] = 0
-                self.runtime_edges[self.next_node, self.prev_node] = 0
-                self.algo = get_algorithm('BFS', self.nodes, self.runtime_edges, self.prev_node, self.node_end)
-                self.path = self.algo.compute()
-                self.prev_node = None
-                self.next_node = self.path.pop(0)
-            elif self.info_stop_right > 0 and (self.is_left_edge(x_s, y_s, x_f, y_f)):
+            if self.info_stop > 0:
+                
                 self.runtime_edges[self.prev_node, self.next_node] = 0
                 self.runtime_edges[self.next_node, self.prev_node] = 0
                 self.algo = get_algorithm('BFS', self.nodes, self.runtime_edges, self.prev_node, self.node_end)
@@ -145,8 +127,8 @@ class ControllerNode(Node):
             else:
                 pass
 
-        thymio_position = self.pose3d_to_2d(get_thymio_position())
-        thymio_orientation = get_thymio_orientation()
+        
+       
         if self.euclidean_distance(thymio_position, self.coords_to_pose2d(self.nodes_coords[self.next_node])) < 0.20:
             if len(self.path) == 0:
                 raise KeyboardInterrupt()
@@ -204,7 +186,7 @@ class ControllerNode(Node):
 
     def proximity_callback(self, message):
         distance  = message.range
-        if distance >= 0 and distance < 0.2:
+        if distance >= 0 and distance < 0.15:
             self.info_stop = distance
             # self.get_logger().info('detrecting front')
         else:
