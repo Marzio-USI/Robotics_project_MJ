@@ -17,6 +17,7 @@
        with the following syntax: ros2 launch <package_name> <launch_file> thymio_name:=thymio1 -->
   <arg name="thymio_name" default="thymio0"/>
   <arg name="exec_name" default="right"/>
+  <arg name="algo_name" default="BFS"/>
   
 
   <!-- 
@@ -30,6 +31,8 @@
        The `output` option configures the node to print to the terminal, to help with debugging.
        By default, nodes launched from a launch file print their output to a log file.
   -->
-  <node pkg="assignment2" exec="$(var exec_name)" namespace="$(var thymio_name)" output='screen' />
+  <node pkg="assignment2" exec="$(var exec_name)" namespace="$(var thymio_name)" output='screen'>
+     <param name="algo_name" value="$(var algo_name)"/>
+</node> 
 </launch>
 

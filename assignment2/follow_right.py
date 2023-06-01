@@ -21,7 +21,15 @@ class ControllerNode(Node):
     def __init__(self):
         super().__init__('controller_node')
 
-        nodes, nodes_coords, edges, start_point, end_point = spawn_maze(size=54)
+        self.declare_parameter('algo_name', 'default_value')
+
+        print(self.get_parameter('algo_name').get_parameter_value().string_value)
+
+
+        nodes, nodes_coords, edges, start_point, end_point, node_start, node_end = spawn_maze(size=54)
+
+
+        
         
 
         # realtive_node_coords = self.global_to_local(start_point, nodes_coords)

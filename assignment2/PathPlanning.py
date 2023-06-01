@@ -157,12 +157,15 @@ class Dijkstra(PathPlanning):
         return self.dijkstra_path(self.graph)
 #%%
 
-# nodes = nodes.replace(" ", ", ")
-# adj_mat = adj_mat.replace(" ", ", ")
-# adj_mat = adj_mat.replace("][", "],[")
-
-# nodes_list = ast.literal_eval(nodes)
-# adj_mat_list = ast.literal_eval(adj_mat)
+def get_algorithm(name:str, nodes : list, edges : np.ndarray, node_start: int, node_end:int):
+    if name == 'DFS':
+        return DFS(nodes, edges, node_start, node_end)
+    elif name =='BFS':
+        return BFS(nodes, edges, node_start, node_end)
+    elif name == 'DJ':
+        return Dijkstra(nodes, edges, node_start, node_end)
+    else:
+        raise NotImplementedError()
 #%%
 # path_planning = Dijkstra(nodes_list, adj_mat_list, 1, 99)
 # path = path_planning.compute()
