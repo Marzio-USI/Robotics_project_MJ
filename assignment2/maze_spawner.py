@@ -40,6 +40,11 @@ def get_thymio_position():
     position = sim.getObjectPosition(thymio_handle, -1)
     return position
 
+def get_thymio_orientation():
+    global client, sim, thymio_handle  
+    orientation = sim.getObjectOrientation(thymio_handle, -1)
+    return orientation
+
 
 def spawn_maze(size=40):
     global client, sim, thymio_handle    
