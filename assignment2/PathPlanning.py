@@ -278,36 +278,36 @@ class HybridPathFinder(PathPlanning):
 
     
 
-#%%
-from data_test import nodes, adj_mat
-nodes = nodes.replace(" ", ", ")
-adj_mat = adj_mat.replace(" ", ", ")
-adj_mat = adj_mat.replace("][", "],[")
+# #%%
+# from data_test import nodes, adj_mat
+# nodes = nodes.replace(" ", ", ")
+# adj_mat = adj_mat.replace(" ", ", ")
+# adj_mat = adj_mat.replace("][", "],[")
 
-nodes_list = ast.literal_eval(nodes)
-adj_mat_list = ast.literal_eval(adj_mat)
-#%%
-path_planning = Dijkstra(nodes_list, adj_mat_list, 1, 99)
-path = path_planning.compute()
-print(path)
-# %%
-path_planning = DFS(nodes_list, adj_mat_list, 1, 99)
-path = path_planning.compute()
-print(path)
-# %%
-path_planning = BFS(nodes_list, adj_mat_list, 1, 99)
-path = path_planning.compute()
-print(path)
-#%%
-path_planning = BiconnectedBFS(nodes_list, adj_mat_list, 1, 99)
-path = path_planning.compute()
-print(path)
+# nodes_list = ast.literal_eval(nodes)
+# adj_mat_list = ast.literal_eval(adj_mat)
+# #%%
+# path_planning = Dijkstra(nodes_list, adj_mat_list, 1, 99)
+# path = path_planning.compute()
+# print(path)
+# # %%
+# path_planning = DFS(nodes_list, adj_mat_list, 1, 99)
+# path = path_planning.compute()
+# print(path)
+# # %%
+# path_planning = BFS(nodes_list, adj_mat_list, 1, 99)
+# path = path_planning.compute()
+# print(path)
+# #%%
+# path_planning = BiconnectedBFS(nodes_list, adj_mat_list, 1, 99)
+# path = path_planning.compute()
+# print(path)
 
-# %%
-path_planning = HybridPathFinder(nodes_list, adj_mat_list, 1, 99)
-path = path_planning.compute()
-print(path)
-# %%
+# # %%
+# path_planning = HybridPathFinder(nodes_list, adj_mat_list, 1, 99)
+# path = path_planning.compute()
+# print(path)
+# # %%
 
  
 
@@ -318,5 +318,9 @@ def get_algorithm(name:str, nodes : list, edges : np.ndarray, node_start: int, n
         return BFS(nodes, edges, node_start, node_end)
     elif name == 'DJ':
         return Dijkstra(nodes, edges, node_start, node_end)
+    elif name == 'BC':
+        return BiconnectedBFS(nodes, edges, node_start, node_end)
     else:
         raise NotImplementedError()
+
+# %%

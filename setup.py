@@ -26,6 +26,7 @@ setup(
             'task3=assignment2.task3:main',
             'bonus=assignment2.bonus:main',
             'right=assignment2.follow_right:main',
+            'solver=assignment2.maze_solver:main'
         ],
     },
 )
