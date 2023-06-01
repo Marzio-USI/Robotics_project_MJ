@@ -103,36 +103,52 @@ class ControllerNode(Node):
                 raise KeyboardInterrupt()
             self.prev_node = self.next_node
             self.next_node = self.path.pop(0)
-        
+        x, y = thymio_position
         prev_node_x, prev_node_y , _ = self.coords_to_pose2d(self.nodes_coords[self.prev_node])
         next_node_x, next_node_y , _ = self.coords_to_pose2d(self.nodes_coords[self.next_node])
         # up x is the same, y is higher
         cmd_vel = Twist() 
+        correction = 0.0
         if (prev_node_x == next_node_x) and (prev_node_y < next_node_y):
+            if abs(prev_node_x - x) > 0.01:
+                if prev_node_x < x:
+                    # go left
+                    correction = math.pi / 6
+                else:
+                    correction = -math.pi / 6
+                    
             angle = self.rotate(thymio_orientation, FACING_UP) 
         elif (prev_node_x == next_node_x) and (prev_node_y > next_node_y):
             # down (x is the same, y is lower)
+            if abs(prev_node_x - x) > 0.01:
+                if prev_node_x < x:
+                    # go left
+                    correction = -math.pi / 6
+                else:
+                    correction = +math.pi / 6
             angle = self.rotate(thymio_orientation, FACING_DOWN)
 
         elif (prev_node_x < next_node_x) and (prev_node_y == next_node_y):
             # right (x is higher for next), y is the same
             angle = self.rotate(thymio_orientation, FACING_RIGHT)
+            if abs(prev_node_y - y) > 0.01:
+                if prev_node_y < y:
+                    # go left
+                    correction = -math.pi / 6
+                else:
+                    correction = math.pi / 6
         else:
             angle = self.rotate(thymio_orientation, FACING_LEFT)
-        cmd_vel.angular.z = angle
-        cmd_vel.linear.x = self.linear_vel(angle)
-         if self.info_stop_left > 0 or self.info_stop_right > 0:
-            cmd_vel.linear.x *= 0.5
-            
-        if abs(angle) < 0.01:
-            diff = abs(self.info_stop_left - self.info_stop_right)
-            # correction of pose
-            if diff > 0.01:
-                if (self.info_stop_left > self.info_stop_right):
-                    cmd_vel.angular.z += ((math.pi) / 6)
+            if abs(prev_node_y - y) > 0.01:
+                if prev_node_y < y:
+                    # go left
+                    correction = math.pi / 6
                 else:
-                    cmd_vel.angular.z -= ((math.pi) / 6)
+                    correction = -math.pi / 6
 
+    
+        cmd_vel.angular.z = angle + correction
+        cmd_vel.linear.x = self.linear_vel(angle + correction) 
         self.vel_publisher.publish(cmd_vel)
 
          
