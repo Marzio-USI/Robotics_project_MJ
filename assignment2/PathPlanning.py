@@ -275,6 +275,40 @@ class HybridPathFinder(PathPlanning):
 
         return path_start + path_end[1:] 
 
+
+    
+
+#%%
+from data_test import nodes, adj_mat
+nodes = nodes.replace(" ", ", ")
+adj_mat = adj_mat.replace(" ", ", ")
+adj_mat = adj_mat.replace("][", "],[")
+
+nodes_list = ast.literal_eval(nodes)
+adj_mat_list = ast.literal_eval(adj_mat)
+#%%
+path_planning = Dijkstra(nodes_list, adj_mat_list, 1, 99)
+path = path_planning.compute()
+print(path)
+# %%
+path_planning = DFS(nodes_list, adj_mat_list, 1, 99)
+path = path_planning.compute()
+print(path)
+# %%
+path_planning = BFS(nodes_list, adj_mat_list, 1, 99)
+path = path_planning.compute()
+print(path)
+#%%
+path_planning = BiconnectedBFS(nodes_list, adj_mat_list, 1, 99)
+path = path_planning.compute()
+print(path)
+
+# %%
+path_planning = HybridPathFinder(nodes_list, adj_mat_list, 1, 99)
+path = path_planning.compute()
+print(path)
+# %%
+
  
 
 def get_algorithm(name:str, nodes : list, edges : np.ndarray, node_start: int, node_end:int):
