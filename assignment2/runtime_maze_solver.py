@@ -87,7 +87,7 @@ class ControllerNode(Node):
     
     def linear_vel(self, angle):
         angle = abs(angle)
-        return (1.0 / ((angle+1)**2 ))*0.3
+        return (1.0 / ((angle+1)**2 ))*0.2
 
   
 
@@ -107,6 +107,14 @@ class ControllerNode(Node):
     
     def is_left_edge(self, node_x, node_y, node_f_x, node_f_y):
         return node_y == node_f_y and node_x > node_f_x
+    
+    def looking_at_the_right_edge(self, thymio_orient, x_s, y_s, x_f, y_f):
+        z = thymio_orient[-1]
+        facing_up = (abs(z - FACING_UP) < 0.1) and self.is_right_edge(x_s, y_s, x_f, y_f)
+        facing_down = (abs(z - FACING_DOWN) < 0.1) and self.is_left_edge(x_s, y_s, x_f, y_f)
+        facing_right = (abs(z - FACING_RIGHT) < 0.1) and self.is_lower_edge(x_s, y_s, x_f, y_f)
+        facing_left = (abs(z - FACING_LEFT) < 0.1) and self.is_upper_edge(x_s, y_s, x_f, y_f)
+        return facing_up or facing_down or facing_right or facing_left
 
 
     def update_callback(self):
@@ -117,13 +125,13 @@ class ControllerNode(Node):
             x_s, y_s, _ = self.coords_to_pose2d(self.nodes_coords[self.prev_node])
             x_f, y_f, _ = self.coords_to_pose2d(self.nodes_coords[self.next_node])
             if self.info_stop > 0:
-                
-                self.runtime_edges[self.prev_node, self.next_node] = 0
-                self.runtime_edges[self.next_node, self.prev_node] = 0
-                self.algo = get_algorithm('BFS', self.nodes, self.runtime_edges, self.prev_node, self.node_end)
-                self.path = self.algo.compute()
-                self.prev_node = None
-                self.next_node = self.path.pop(0)
+                if self.looking_at_the_right_edge(thymio_orientation, x_s, y_s, x_f, y_f):
+                    self.runtime_edges[self.prev_node, self.next_node] = 0
+                    self.runtime_edges[self.next_node, self.prev_node] = 0
+                    self.algo = get_algorithm('BFS', self.nodes, self.runtime_edges, self.prev_node, self.node_end)
+                    self.path = self.algo.compute()
+                    self.prev_node = None
+                    self.next_node = self.path.pop(0)
             else:
                 pass
 
