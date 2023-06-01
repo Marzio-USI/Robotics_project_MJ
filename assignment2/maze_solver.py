@@ -121,6 +121,9 @@ class ControllerNode(Node):
             angle = self.rotate(thymio_orientation, FACING_LEFT)
         cmd_vel.angular.z = angle
         cmd_vel.linear.x = self.linear_vel(angle)
+         if self.info_stop_left > 0 or self.info_stop_right > 0:
+            cmd_vel.linear.x *= 0.5
+            
         if abs(angle) < 0.01:
             diff = abs(self.info_stop_left - self.info_stop_right)
             # correction of pose
