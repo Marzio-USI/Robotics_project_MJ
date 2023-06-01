@@ -191,31 +191,31 @@ class GraphMaze:
 
 
 
-if __name__ == '__main__':
-    maze = GraphMaze()
-    nodes, verticals, horizontals, edges, cood_vert, cood_horz = maze.generate_maze(size=60)
-    start = np.random.choice(nodes)
-    end = np.random.choice(np.delete(deepcopy(nodes), start))
+# if __name__ == '__main__':
+#     maze = GraphMaze()
+#     nodes, verticals, horizontals, edges, cood_vert, cood_horz = maze.generate_maze(size=60)
+#     start = np.random.choice(nodes)
+#     end = np.random.choice(np.delete(deepcopy(nodes), start))
 
-    # maze.draw_maze()
-    # print(np.where(edges[0]==1)[0].tolist())
+#     # maze.draw_maze()
+#     # print(np.where(edges[0]==1)[0].tolist())
     
 
-    print(start, end)
-    algo = DFS(nodes, edges, start, end)
-    path = algo.compute()
+#     print(start, end)
+#     algo = DFS(nodes, edges, start, end)
+#     path = algo.compute()
 
-    print('DFS', path)
+#     print('DFS', path)
 
-    algo2 = BFS(nodes, edges, start, end)
-    path = algo2.compute()
+#     algo2 = BFS(nodes, edges, start, end)
+#     path = algo2.compute()
 
-    print('BFS', path)
+#     print('BFS', path)
 
-    algo3 = Dijkstra(nodes, edges, start, end)
-    path = algo3.compute()
+#     algo3 = Dijkstra(nodes, edges, start, end)
+#     path = algo3.compute()
 
-    print('DJ', path)
+#     print('DJ', path)
 
 
 
