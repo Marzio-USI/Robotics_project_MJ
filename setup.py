@@ -21,13 +21,12 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'task1=assignment2.task1:main',
-            'task2=assignment2.task2:main',
-            'task3=assignment2.task3:main',
-            'bonus=assignment2.bonus:main',
             'right=assignment2.follow_right:main',
             'solver=assignment2.maze_solver:main',
             'runtime=assignment2.runtime_maze_solver:main',
+            'g=assignment2.generate_maze:main',
+            'k=assignment2.maze_spawner:main',
+            'p=assignment2.PathPlanning:main'
         ],
     },
 )

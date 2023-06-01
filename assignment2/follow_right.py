@@ -6,29 +6,24 @@ from geometry_msgs.msg import Twist, Pose
 from nav_msgs.msg import Odometry
 import time
 import sys
+import os
+dir_path  = os.path.dirname(os.path.abspath(__file__))
+print(dir_path)
+sys.path.append(dir_path)
 from sensor_msgs.msg import Range
 import math
 from math import sqrt
 
-dir_path1 = '/home/robotics23/dev_ws/src/assignment2'
-dir_path2 = '/home/robotics23/dev_ws/src/assignment2/assignment2'
-sys.path.append(dir_path1)
-sys.path.append(dir_path2)
-from maze_spawner import spawn_maze, get_thymio_position
-import os
 
+
+from maze_spawner import spawn_maze, get_thymio_position
 class ControllerNode(Node):
     def __init__(self):
         super().__init__('controller_node')
 
-        self.declare_parameter('algo_name', 'default_value')
-
-        print(self.get_parameter('algo_name').get_parameter_value().string_value)
-
-
         nodes, nodes_coords, edges, start_point, end_point, node_start, node_end = spawn_maze(size=54)
 
-
+        
         
         
 

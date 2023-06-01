@@ -26,6 +26,27 @@ FACING_RIGHT = 0.0
 COMPLETE_ROTATION= 2* math.pi
 HALF_ROTATION = math.pi
 
+
+def generate_connection(n_nodes) -> np.ndarray:
+    edges = np.zeros((n_nodes, n_nodes), dtype=int)
+    for i in range(n_nodes):
+        if (i+1) % 10 == 0:
+            edges[i, i-1] = 1
+        elif (i) % 10 == 0:
+            edges[i, i+1] = 1
+        else:
+            edges[i, i+1] = 1
+            edges[i, i-1] = 1
+
+        if  i >= 90:
+            edges[i, i-10] = 1
+        elif i < 10:
+            edges[i, i+10] = 1
+        else:
+            edges[i, i+10] = 1
+            edges[i, i-10] = 1
+    return edges
+
 class ControllerNode(Node):
     def __init__(self):
         super().__init__('controller_node')
@@ -34,7 +55,7 @@ class ControllerNode(Node):
 
         nodes, nodes_coords, edges , start_point, end_point, node_start, node_end = spawn_maze(size=54)
 
-        self.runtime_edges = np.ones(shape=edges.shape, dtype=int)
+        self.runtime_edges = generate_connection(len(nodes))
 
 
         self.algo = get_algorithm('BFS', nodes, self.runtime_edges, node_start, node_end)
@@ -42,7 +63,8 @@ class ControllerNode(Node):
         self.nodes = nodes
 
         self.path = self.algo.compute()
-        self.prev_node = None
+        self.get_logger().info('original {}'.format(str(self.path)))
+        self.prev_node = self.path.pop(0)
         self.next_node = self.path.pop(0)
 
         self.node_end = node_end
@@ -63,8 +85,8 @@ class ControllerNode(Node):
 
 
         self.proximity_center_subscriber = self.create_subscription(Range, 'proximity/center', self.proximity_callback, 10)
-        self.proximity_left_subscriber = self.create_subscription(Range, 'proximity/left', self.proximity_callback_left, 10)
-        self.proximity_right_subscriber = self.create_subscription(Range, 'proximity/right', self.proximity_callback_right, 10)
+        # self.proximity_left_subscriber = self.create_subscription(Range, 'proximity/left', self.proximity_callback_left, 10)
+        # self.proximity_right_subscriber = self.create_subscription(Range, 'proximity/right', self.proximity_callback_right, 10)
 
 
         # self.proximity_rear_left_subscriber = self.create_subscription(Range, 'proximity/rear_left',self.proximity_callback_back, 10)
@@ -76,6 +98,7 @@ class ControllerNode(Node):
         self.info_stop = -1.0
         self.info_stop_left = -1.0
         self.info_stop_right = -1.0
+
   
 
     def coords_to_pose2d(self, coords):
@@ -86,8 +109,13 @@ class ControllerNode(Node):
         )
     
     def linear_vel(self, angle):
-        angle = abs(angle)
-        return (1.0 / ((angle+1)**2 ))*0.2
+        if abs(angle) < 0.017:
+            return 0.14
+        else:
+            if abs(angle) >= (math.pi/2.5):
+                return 0.005
+            else:
+                return 0.01
 
   
 
@@ -110,34 +138,47 @@ class ControllerNode(Node):
     
     def looking_at_the_right_edge(self, thymio_orient, x_s, y_s, x_f, y_f):
         z = thymio_orient[-1]
-        facing_up = (abs(z - FACING_UP) < 0.1) and self.is_right_edge(x_s, y_s, x_f, y_f)
-        facing_down = (abs(z - FACING_DOWN) < 0.1) and self.is_left_edge(x_s, y_s, x_f, y_f)
-        facing_right = (abs(z - FACING_RIGHT) < 0.1) and self.is_lower_edge(x_s, y_s, x_f, y_f)
-        facing_left = (abs(z - FACING_LEFT) < 0.1) and self.is_upper_edge(x_s, y_s, x_f, y_f)
+        facing_up = (abs(z - FACING_UP) < 0.176) and self.is_upper_edge(x_s, y_s, x_f, y_f)
+        facing_down = (abs(z - FACING_DOWN) < 0.176) and self.is_lower_edge(x_s, y_s, x_f, y_f)
+        facing_right = (abs(z - FACING_RIGHT) < 0.176) and self.is_right_edge(x_s, y_s, x_f, y_f)
+        facing_left = (abs(z - FACING_LEFT) < 0.176) and self.is_left_edge(x_s, y_s, x_f, y_f)
         return facing_up or facing_down or facing_right or facing_left
 
 
     def update_callback(self):
         thymio_position = self.pose3d_to_2d(get_thymio_position())
         thymio_orientation = get_thymio_orientation()
+
+
+        if self.euclidean_distance(thymio_position, self.coords_to_pose2d(self.nodes_coords[self.node_end])) < 0.26:
+            raise KeyboardInterrupt()
+
+        cmd_vel = Twist() 
         if self.prev_node is not None:
             # if sensor detects something it remove edges and recompute the path
             x_s, y_s, _ = self.coords_to_pose2d(self.nodes_coords[self.prev_node])
             x_f, y_f, _ = self.coords_to_pose2d(self.nodes_coords[self.next_node])
             if self.info_stop > 0:
                 if self.looking_at_the_right_edge(thymio_orientation, x_s, y_s, x_f, y_f):
+                    cmd_vel.angular.z = 0.0
+                    cmd_vel.linear.x = 0.0
+                    self.vel_publisher.publish(cmd_vel)
+                    # self.get_logger().info('removing edge {} {}'.format(self.prev_node, self.next_node))
                     self.runtime_edges[self.prev_node, self.next_node] = 0
                     self.runtime_edges[self.next_node, self.prev_node] = 0
                     self.algo = get_algorithm('BFS', self.nodes, self.runtime_edges, self.prev_node, self.node_end)
                     self.path = self.algo.compute()
-                    self.prev_node = None
+                    # self.get_logger().info('new path {}'.format(str(self.path)))
+                    self.prev_node = self.path.pop(0)
                     self.next_node = self.path.pop(0)
+                    return
+
             else:
                 pass
-
+            
         
        
-        if self.euclidean_distance(thymio_position, self.coords_to_pose2d(self.nodes_coords[self.next_node])) < 0.20:
+        if self.euclidean_distance(thymio_position, self.coords_to_pose2d(self.nodes_coords[self.next_node])) < 0.1:
             if len(self.path) == 0:
                 raise KeyboardInterrupt()
             self.prev_node = self.next_node
@@ -146,15 +187,15 @@ class ControllerNode(Node):
         prev_node_x, prev_node_y , _ = self.coords_to_pose2d(self.nodes_coords[self.prev_node])
         next_node_x, next_node_y , _ = self.coords_to_pose2d(self.nodes_coords[self.next_node])
         # up x is the same, y is higher
-        cmd_vel = Twist() 
+        angle = 0.0
         correction = 0.0
         if (prev_node_x == next_node_x) and (prev_node_y < next_node_y):
             if abs(prev_node_x - x) > 0.01:
                 if prev_node_x < x:
                     # go left
-                    correction = math.pi / 6
+                    correction = math.pi / 3.5
                 else:
-                    correction = -math.pi / 6
+                    correction = -math.pi / 3.5
                     
             angle = self.rotate(thymio_orientation, FACING_UP) 
         elif (prev_node_x == next_node_x) and (prev_node_y > next_node_y):
@@ -162,9 +203,9 @@ class ControllerNode(Node):
             if abs(prev_node_x - x) > 0.01:
                 if prev_node_x < x:
                     # go left
-                    correction = -math.pi / 6
+                    correction = -math.pi /3.5
                 else:
-                    correction = +math.pi / 6
+                    correction = +math.pi / 3.5
             angle = self.rotate(thymio_orientation, FACING_DOWN)
 
         elif (prev_node_x < next_node_x) and (prev_node_y == next_node_y):
@@ -173,30 +214,31 @@ class ControllerNode(Node):
             if abs(prev_node_y - y) > 0.01:
                 if prev_node_y < y:
                     # go left
-                    correction = -math.pi / 6
+                    correction = -math.pi /3.5
                 else:
-                    correction = math.pi / 6
+                    correction = math.pi / 3.5
         else:
             angle = self.rotate(thymio_orientation, FACING_LEFT)
             if abs(prev_node_y - y) > 0.01:
                 if prev_node_y < y:
                     # go left
-                    correction = math.pi / 6
+                    correction = math.pi / 3.5
                 else:
-                    correction = -math.pi / 6
+                    correction = -math.pi / 3.5
 
     
         cmd_vel.angular.z = angle + correction
-        cmd_vel.linear.x = self.linear_vel(angle + correction) 
+        cmd_vel.linear.x = self.linear_vel(angle + correction)  
         self.vel_publisher.publish(cmd_vel)
 
          
 
     def proximity_callback(self, message):
         distance  = message.range
-        if distance >= 0 and distance < 0.15:
+        if distance >= 0.0 and distance < 0.255:
             self.info_stop = distance
-            # self.get_logger().info('detrecting front')
+            self.get_logger().info('detected {}'.format(distance))
+   
         else:
             self.info_stop = -1.0
 
@@ -212,6 +254,7 @@ class ControllerNode(Node):
         distance  = message.range
         if distance >= 0 and distance < 0.2:
             self.info_stop_right = distance
+    
             # self.get_logger().info('detrecting right')
         else:
             self.info_stop_right = -1.0

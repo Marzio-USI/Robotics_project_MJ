@@ -1,4 +1,9 @@
 #%%
+import sys
+import os
+dir_path  = os.path.dirname(os.path.abspath(__file__))
+print(dir_path)
+sys.path.append(dir_path)
 import ast
 from collections import deque
 import numpy as np
@@ -307,9 +312,6 @@ class HybridPathFinder(PathPlanning):
 # path_planning = HybridPathFinder(nodes_list, adj_mat_list, 1, 99)
 # path = path_planning.compute()
 # print(path)
-# # %%
-
- 
 
 def get_algorithm(name:str, nodes : list, edges : np.ndarray, node_start: int, node_end:int):
     if name == 'DFS':
@@ -322,5 +324,11 @@ def get_algorithm(name:str, nodes : list, edges : np.ndarray, node_start: int, n
         return BiconnectedBFS(nodes, edges, node_start, node_end)
     else:
         raise NotImplementedError()
+# # %%
+if __name__ == '__main__':
+    pass
+ 
+
+
 
 # %%

@@ -3,20 +3,11 @@ import random
 
 import networkx as nx
 import matplotlib.pyplot as plt
-import os
 import sys
-dir_path = os.path.dirname(os.path.abspath(__file__))
-dir_path2 = '/home/robotics23/dev_ws/src/assignment2'
-dir_path3 = '/home/robotics23/dev_ws/src/assignment2/assignment2'
-# dir_path3 = '/home/robotics23/dev_ws/src/assignment2/assignment2'
-# dir_path4 = '/home/robotics23/apps/CoppeliaSim_Edu_V4_4_0_rev0_Ubuntu22_04/programming/legacyRemoteApi/remoteApiBindings/lib/lib/Ubuntu20_04'
-dir_path5 = '/home/robotics23/apps/CoppeliaSim_Edu_V4_4_0_rev0_Ubuntu22_04/programming/zmqRemoteApi/clients/python'
-# Add the directory to sys.path
+import os
+dir_path  = os.path.dirname(os.path.abspath(__file__))
+print(dir_path)
 sys.path.append(dir_path)
-sys.path.append(dir_path2)
-sys.path.append(dir_path3)
-# sys.path.append(dir_path4)
-sys.path.append(dir_path5)
 from copy import deepcopy
 from PathPlanning import *
 
@@ -179,20 +170,23 @@ class GraphMaze:
         for i in range(n_nodes):
             for j in range(n_nodes):
                 if self.edges[i][j] == 1:
-                    G.add_edge(i, j, color='g') 
+                    G.add_edge(i, j, color='black') 
                
                        
         pos = {i: (i % 10, i // 10) for i in self.nodes}
         colors = nx.get_edge_attributes(G,'color').values()
 
         nx.draw(G, with_labels=True, edge_color=colors, node_color='black', pos=pos)
+        plt.savefig('maze6.pdf', format='pdf', bbox_inches='tight')
         plt.show()
 
 
 
 
-# if __name__ == '__main__':
-#     maze = GraphMaze()
+if __name__ == '__main__':
+    maze = GraphMaze()
+    maze.generate_maze(size=40)
+    maze.draw_maze()
 #     nodes, verticals, horizontals, edges, cood_vert, cood_horz = maze.generate_maze(size=60)
 #     start = np.random.choice(nodes)
 #     end = np.random.choice(np.delete(deepcopy(nodes), start))
