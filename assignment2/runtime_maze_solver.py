@@ -32,9 +32,9 @@ class ControllerNode(Node):
 
 
 
-        nodes, nodes_coords, edges, start_point, end_point, node_start, node_end = spawn_maze(size=54)
+        nodes, nodes_coords, edges , start_point, end_point, node_start, node_end = spawn_maze(size=54)
 
-        self.runtime_edges = np.ones(edges.size(), dtype=np.int32)
+        self.runtime_edges = np.ones(shape=edges.shape, dtype=int)
 
 
         self.algo = get_algorithm('BFS', nodes, self.runtime_edges, node_start, node_end)
